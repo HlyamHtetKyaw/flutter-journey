@@ -9,7 +9,7 @@ class MyHomePage extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Product Listing")),
+      appBar: AppBar(title: Text(this.title)),
       body: ListView(
         shrinkWrap: true, padding: const EdgeInsets.fromLTRB(2, 10, 2, 10),
         children: <Widget>[
@@ -32,11 +32,42 @@ class MyApp extends StatelessWidget{
     return MaterialApp(
       title: 'Flutter Test',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: MyHomePage(title: "Baki Listing"),
+      home: MyGesture(),
     );
   }
 }
+class MyGesture extends StatelessWidget{
+  const MyGesture({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Gesture testing")),
+      body: Center(
+        child: GestureDetector(
+          onTap: (){
+            _showDialog(context);
+          },
+          child: Text('Hello World'),
+        ),
+      ),
+    );
+  }
+
+   void _showDialog(BuildContext context){
+    showDialog(context: context, builder: (BuildContext context){
+      return AlertDialog(
+        title: Text("Message"),
+        content: Text("Hello World"),
+        actions: <Widget>[
+          TextButton(onPressed: (){
+            Navigator.of(context).pop();
+          }, child: Text("close"))
+        ],
+      );
+    });
+  }
+}
 class MyButton extends StatelessWidget{
   const MyButton({super.key});
 
