@@ -3,142 +3,45 @@ import 'package:flutter/material.dart';
 
 import 'Product.dart';
 
-class MyApp extends StatelessWidget{
+class MyApp extends StatefulWidget{
   const MyApp({super.key});
-  
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin{
+  late Animation<double> animation;
+  late AnimationController controller;
+  @override
+  void initState(){
+    super.initState();
+    controller = AnimationController(vsync: this,duration: const Duration(seconds: 10));
+    animation = Tween<double>(begin: 0.0,end:1.0).animate(controller);
+    controller.forward();
+  }
   @override
   Widget build(BuildContext context) {
+    controller.forward();
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue
-      ),
-      home: MyHomePage(title: "Testing stage management"),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: MyHomePage(title: "Product layout demo home page",animation: animation)
     );
   }
-}
 
-class MyHomePage extends StatelessWidget{
-  final String title;
-  final items = Product.getProducts();
-  MyHomePage({super.key,required this.title});
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(this.title),
-      ),
-      body: ListView.builder(
-          itemCount: items.length,
-          itemBuilder: (context,index){
-          return GestureDetector(
-            child: ProductBox(item: items[index]),
-            onTap: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>ProductPage(item:items[index])));
-            },
-          );
-      }),
-    );    
-  }
-}
-
-class ProductPage extends StatelessWidget{
-  final Product item;
-  ProductPage({super.key,required this.item});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(this.item.name)),
-      body: Center(
-        child: Container(
-          padding: EdgeInsets.all(0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Image.asset("assets/"+this.item.image),
-              Expanded(child: Container(
-                padding: EdgeInsets.all(5),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Text(this.item.name,style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text(this.item.description),
-                    Text("Price: "+this.item.price.toString()),
-                    RatingBox()
-                  ],
-                ),
-              ))
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-class RatingBox extends StatefulWidget{
-  @override
-  _RatiingBoxState createState() => _RatiingBoxState();
-}
-
-class _RatiingBoxState extends State<RatingBox>{
-  int _rating = 0;
-  void _setRatingAsOne(){
-    setState(() {
-      _rating = 1;
-    });
-  }
-  void _setRatingAsTwo(){
-    setState(() {
-      _rating = 2;
-    });
-  }
-  void _setRatingAsThree(){
-    setState(() {
-      _rating = 3;
-    });
-  }
-  @override
-  Widget build(BuildContext context) {
-    double _size = 20;
-    print(_rating);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.max,
-      children: <Widget>[
-        Container(
-          padding: EdgeInsets.all(0),
-          child: IconButton(
-            onPressed: _setRatingAsOne,
-            icon: (_rating>=1)?Icon(Icons.star,size:_size):Icon(Icons.star_border,size:_size),
-            color: Colors.red,
-            iconSize: _size,)
-        ),
-        Container(
-          padding: EdgeInsets.all(0),
-          child: IconButton(
-            onPressed: _setRatingAsTwo,
-            icon: (_rating>=2)?Icon(Icons.star,size: _size):Icon(Icons.star_border,size:_size),
-            color: Colors.red[500],
-            iconSize: _size,),
-        ),
-        Container(
-          padding: EdgeInsets.all(0),
-          child: IconButton(
-            onPressed: _setRatingAsThree,
-            icon: (_rating>=3)?Icon(Icons.star,size:_size):Icon(Icons.star_border,size:_size),
-            iconSize: _size,),
-        )
-      ],
-    );
-    throw UnimplementedError();
+  void dispose(){
+    controller.dispose();
+    super.dispose();
   }
 }
 
 class ProductBox extends StatelessWidget{
-  final Product item;
-  ProductBox({super.key,required this.item});
+  final String name;
+  final String description;
+  final int price;
+  final String image;
+
+  ProductBox({super.key,required this.name,required this.description,required this.price,required this.image});
 
   @override
   Widget build(BuildContext context) {
@@ -149,16 +52,15 @@ class ProductBox extends StatelessWidget{
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            Image.asset("assets/"+this.item.image),
+            Image.asset("assets/"+this.image),
             Expanded(child: Container(
               padding: EdgeInsets.all(5),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  Text(this.item.name,style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text(this.item.description),
-                  Text("Price: "+this.item.price.toString()),
-                  RatingBox()
+                  Text(this.name,style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(this.description),
+                  Text("Price "+this.price.toString())
                 ],
               ),
             ))
@@ -167,6 +69,55 @@ class ProductBox extends StatelessWidget{
       ),
     );
   }
+}
+
+class MyAnimationWidget extends StatelessWidget{
+  final Widget child;
+  final Animation<double> animation;
+  MyAnimationWidget({super.key,required this.child,required this.animation});
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: AnimatedBuilder(
+      animation: animation,
+      builder: (context,child) => Container(
+        child: Opacity(opacity: animation.value,child: child)
+      ),
+      child: child
+    )
+  );
+}
+
+class MyHomePage extends StatelessWidget{
+  final String title;
+  final Animation<double> animation;
+
+  MyHomePage({super.key,required this.title,required this.animation});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Product Listing"),
+      ),
+      body: ListView(
+        shrinkWrap: true,
+        padding: const EdgeInsets.fromLTRB(2, 10, 2, 10),
+        children: <Widget>[
+          FadeTransition(
+            opacity: animation,
+            child: ProductBox(name: "Baki", description: "Hey Baki", price: 100, image: "baki.jpg"),
+          ),
+          MyAnimationWidget(child: ProductBox(name: "Babi", description: "Hello Babi", price: 200, image: "babi.jpg"), animation: animation),
+          ProductBox(name: "Dabi", description: "Hi Hi Dabi", price: 300, image: "dabi.jpg"),
+          ProductBox(name: "Dabi", description: "Hi Hi Dabi", price: 300, image: "dabi.jpg"),
+          ProductBox(name: "Dabi", description: "Hi Hi Dabi", price: 300, image: "dabi.jpg"),
+          ProductBox(name: "Dabi", description: "Hi Hi Dabi", price: 300, image: "dabi.jpg"),
+        ],
+      ),
+    );
+  }
+
 }
 void main(){
   runApp(MyApp());
