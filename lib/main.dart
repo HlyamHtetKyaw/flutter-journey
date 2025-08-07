@@ -1,93 +1,77 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-void main() {
-  runApp(MyApp());
+class MyHomePage extends StatelessWidget{
+  MyHomePage({Key? key,required this.title}):super(key: key);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(appBar: AppBar(title:Text(this.title),),
+    body: Center(child:Container(
+      decoration: BoxDecoration(color: Colors.white),
+      padding: EdgeInsets.all(25),
+      child: Center(
+        child: Text(
+          'Hello World',
+          style: TextStyle(
+            color: Colors.black,letterSpacing: 0.5,fontSize: 20,
+          ),
+          textDirection: TextDirection.ltr,
+        ),
+      ),
+    )),
+    );
+  }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatelessWidget{
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Bluetooth Demo',
-      home: BluetoothScreen(),
+      title: 'Flutter Test',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: MyHomePage(title: 'Home Page'),
     );
   }
 }
 
-class BluetoothScreen extends StatefulWidget {
-  @override
-  _BluetoothScreenState createState() => _BluetoothScreenState();
-}
-
-class _BluetoothScreenState extends State<BluetoothScreen> {
-  List<ScanResult> scanResults = [];
-
-  @override
-  void initState() {
-    super.initState();
-    initBluetooth();
-  }
-
-  Future<void> initBluetooth() async {
-    // Request permissions
-    await Permission.bluetooth.request();
-    await Permission.bluetoothScan.request();
-    await Permission.bluetoothConnect.request();
-    await Permission.location.request();
-
-    // ✅ Check if Bluetooth is available and turned ON
-    final state = await FlutterBluePlus.adapterState.first;
-    if (state != BluetoothAdapterState.on) {
-      print('Bluetooth is not ON. Please enable it.');
-      return;
-    }
-
-    // ✅ Start scanning
-    await FlutterBluePlus.startScan(timeout: Duration(seconds: 4));
-
-    // ✅ Listen to scan results
-    FlutterBluePlus.scanResults.listen((results) {
-      setState(() {
-        scanResults = results;
-      });
-    });
-  }
-
+class MyButton extends StatelessWidget{
+  const MyButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Bluetooth Devices")),
-      body: ListView.builder(
-        itemCount: scanResults.length,
-        itemBuilder: (context, index) {
-          final result = scanResults[index];
-          return ListTile(
-            title: Text(result.device.platformName.isNotEmpty
-                ? result.device.platformName
-                : 'Unknown'),
-            subtitle: Text(result.device.remoteId.str),
-            onTap: () async {
-              try {
-                await result.device.connect();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Connected to ${result.device.platformName}')),
-                );
-              } catch (e) {
-                print('Error connecting: $e');
-              }
-            },
-          );
-        },
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(
+        top:BorderSide(width: 1.0,color: Color(0xFFFFFFFFFF)),
+        left:BorderSide(width: 1.0,color: Color(0xFFFFFFFFFF)),
+        right:BorderSide(width: 1.0,color: Color(0xFFFFFFFFFF)),
+        bottom:BorderSide(width: 1.0,color: Color(0xFFFFFFFFFF)),
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.refresh),
-        onPressed: () async {
-          await FlutterBluePlus.startScan(timeout: Duration(seconds: 4));
-        },
+      child: Container(
+        padding: const
+        EdgeInsets.symmetric(horizontal: 20.0,vertical: 2.0),
+        decoration: const BoxDecoration(
+          border: Border(
+            top:BorderSide(width: 1.0,color: Color(0xFFFFDFDFDF)),
+            left:BorderSide(width: 1.0,color: Color(0xFFFFDFDFDF)),
+            right:BorderSide(width: 1.0,color: Color(0xFFFFDFDFDF)),
+            bottom:BorderSide(width: 1.0,color: Color(0xFFFFDFDFDF)),
+          ),
+          color: Colors.grey
+        ),
+        child: const Text(
+          'OK',textAlign: TextAlign.center, style: TextStyle(color:Colors.black),
+        ),
       ),
     );
   }
+}
+void main(){
+  runApp(const MyApp());
 }
